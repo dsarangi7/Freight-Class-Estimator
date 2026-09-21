@@ -1,0 +1,124 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Disclaimer from "../components/Disclaimer.astro";
+import FreightCalculator from "../components/FreightCalculator.astro";
+import FaqFreight, { freightFaqItems } from "../components/FaqFreight.astro";
+import { CLASS_DENSITY_RANGES } from "../lib/freightClass";
+
+const site = Astro.site?.toString().replace(/\/$/, "") || "https://freightclassestimator.com";
+
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: freightFaqItems.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
+
+const webAppLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Freight Class Calculator",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Any",
+  url: site + "/",
+  description:
+    "Educational density-scale freight class estimator (Jul 2025 13-class). Multi-pallet volume and weight, optional DIM weight. Not ClassIT+ or a rate quote.",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  publisher: { "@type": "Organization", name: "Freight Class Estimator", url: site },
+};
+
+const CLASS_ORDER = [50, 55, 60, 65, 70, 85, 92.5, 100, 125, 175, 250, 300, 400] as const;
+const classRows = CLASS_ORDER.map((cls) => ({
+  cls: String(cls),
+  range: CLASS_DENSITY_RANGES[cls],
+}));
+---
+
+<BaseLayout
+  title="Freight Class Calculator (Free Estimate) | Density → NMFC-Style Class"
+  description="Free freight class calculator for LTL shipments. Estimate NMFC-style class from density, dimensions, weight, and multiple pallets. Not ClassIT+ or a shipping quote."
+  canonicalPath="/"
+  jsonLd={[webAppLd, faqLd]}
+>
+  <SiteHeader slot="header" current="home" />
+
+  <div class="site-wrap py-8 sm:py-10">
+    <Disclaimer />
+
+    <section class="hero mt-8 mb-8">
+      <p class="mb-2 font-mono text-xs font-medium uppercase tracking-wide text-mute">
+        LTL · Density · NMFC-style estimate
+      </p>
+      <h1 class="text-3xl sm:text-[40px] sm:leading-tight tracking-tight">
+        Freight Class Calculator (Estimate)
+      </h1>
+      <p class="lede mt-3 max-w-2xl text-[17px] leading-7 text-body">
+        Freight Class Estimator provides a free freight class calculator for LTL shipments. Estimate an NMFC-style class from pounds per cubic foot — a
+        <strong class="font-medium text-ink">density-scale estimate (Jul 2025 13-class)</strong>.
+        Multi-pallet friendly. Optional educational DIM weight. Not ClassIT+, not a carrier rate engine.
+      </p>
+    </section>
+
+    <!-- AdSense intentionally omitted. Do not add empty visible ad slots. -->
+
+    <FreightCalculator />
+
+    <section class="card mt-8" aria-labelledby="table-heading">
+      <h2 id="table-heading" class="mb-3 text-lg">Density → class table (effective 2025-07-19)</h2>
+      <p class="mb-4 text-sm text-mute">
+        Inclusive-lower / exclusive-upper (NMFTA Jul 2025 13-class): e.g. ≥50 → 50, 35–&lt;50 → 55, … &lt;1 → 400.
+      </p>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[280px] text-left text-sm">
+          <thead>
+            <tr class="border-b border-hairline text-mute">
+              <th class="py-2 pr-4 font-medium">Class</th>
+              <th class="py-2 font-medium">Density (lb/ft³)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {classRows.map((row) => (
+              <tr class="border-b border-hairline last:border-0">
+                <td class="py-2 pr-4 font-medium tabular-nums text-ink">{row.cls}</td>
+                <td class="py-2 text-body">{row.range}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <article class="prose-seo mt-14" aria-labelledby="guide-heading">
+      <h2 id="guide-heading">How to use this calculator</h2>
+      <p>
+        Measure each pallet’s length, width, and height in <strong>inches</strong> (include packaging that ships with
+        the freight). Enter weight in pounds. Add more pallets if needed. Optionally set a DIM factor for educational
+        comparison only — DIM is not used for the density-scale class estimate.
+      </p>
+      <p>
+        Volume (ft³) = L × W × H ÷ 1728. Density = weight (lb) ÷ volume. The result maps to a class on the Jul 2025
+        13-class density scale (50 densest → 400 lightest). Classic check: a 48×40×48 in pallet at 350 lb is about
+        53.33 ft³ and 6.56 lb/ft³ → <strong>class 125</strong>.
+      </p>
+      <p>
+        Multi-pallet mode <strong>sums all volumes and weights</strong>, then reports one
+        <em>blended</em> density class — not a per-pallet classification. If pallets differ a lot (e.g. steel and
+        pillows), classify lines separately.
+      </p>
+      <p>
+        Density is only a starting point. Stowability, handling, liability, and the specific NMFC item can change the
+        final class. This site is an educational density-scale estimate — <strong>not ClassIT+</strong>, not a binding
+        classification, and not a shipping quote. Confirm with your carrier or broker before booking.
+      </p>
+    </article>
+
+    <FaqFreight />
+  </div>
+
+  <SiteFooter slot="footer" />
+</BaseLayout>

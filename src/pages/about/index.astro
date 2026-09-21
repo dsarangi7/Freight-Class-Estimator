@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+---
+
+<BaseLayout
+  title="About Freight Class Estimator | Density Freight Class Tool"
+  description="About Freight Class Estimator — free educational NMFC-style freight class and density calculator. Not ClassIT+. Not a shipping quote."
+  canonicalPath="/about/"
+>
+  <SiteHeader slot="header" current="about" />
+  <div class="site-wrap prose-seo py-10">
+    <h1 class="text-3xl tracking-tight">About Freight Class Estimator</h1>
+    <p class="mt-4">
+      <strong>Freight Class Estimator</strong> (freightclassestimator.com) publishes a free, private, educational
+      density-based freight class estimator for LTL planning.
+    </p>
+    <p>
+      We focus on clear math: inches → cubic feet → lb/ft³ → NMFC-style class, with multi-pallet totals and an optional
+      educational DIM weight view. These tools do not rate carriers, do not replace NMFTA ClassIT+, and are not affiliated
+      with any freight bureau or carrier network.
+    </p>
+    <p>
+      Start with the <a href="/">freight class calculator</a>. Questions: <a href="/contact/">contact</a>.
+    </p>
+  </div>
+  <SiteFooter slot="footer" />
+</BaseLayout>

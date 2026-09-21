@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#16a34a"/>
+  <g fill="#ffffff">
+    <!-- simple box -->
+    <rect x="96" y="160" width="200" height="160" rx="16" opacity="0.95"/>
+    <path d="M96 200h200" stroke="#bbf7d0" stroke-width="12" fill="none"/>
+    <!-- truck cab hint -->
+    <rect x="300" y="200" width="116" height="120" rx="16"/>
+    <rect x="330" y="220" width="56" height="44" rx="8" fill="#16a34a"/>
+    <circle cx="200" cy="340" r="28"/>
+    <circle cx="360" cy="340" r="28"/>
+  </g>
+  <text x="256" y="130" text-anchor="middle" font-family="system-ui,Segoe UI,Arial,sans-serif"
+        font-size="72" font-weight="700" fill="#ffffff" letter-spacing="-2">fc</text>
+</svg>

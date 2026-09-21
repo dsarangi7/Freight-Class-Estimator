@@ -1,0 +1,253 @@
+---
+---
+
+<section class="card" aria-labelledby="calc-heading">
+  <h2 id="calc-heading" class="mb-2 text-xl">Estimate freight class from density</h2>
+  <p class="mb-4 text-sm text-mute">
+    Enter pallet dimensions (<strong class="text-ink">inches only</strong>) and weight (lb). Multi-pallet: volumes and
+    weights are <strong class="text-ink">summed</strong>, then one blended density → one class (not per-pallet).
+  </p>
+
+  <form id="fc-form" novalidate>
+    <div id="pallet-list" class="space-y-4" aria-live="polite"></div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button type="button" id="add-pallet" class="btn-ghost">Add pallet</button>
+      <button type="button" id="remove-pallet" class="btn-ghost" disabled>Remove last</button>
+    </div>
+
+    <fieldset class="mt-5 rounded-[6px] border border-hairline p-4">
+      <legend class="px-1 text-sm font-medium text-ink">Optional DIM weight (educational)</legend>
+      <p class="mb-3 text-xs text-mute">
+        DIM = volume (ft³) × factor. Carrier DIM factors vary — this is <strong class="text-ink">not a quote</strong>
+        and is <strong class="text-ink">not used for NMFC class</strong>. Common educational defaults: 250 or 194.
+      </p>
+      <div class="field max-w-xs">
+        <label for="dim-factor">DIM factor (lb per ft³)</label>
+        <input type="number" id="dim-factor" name="dim-factor" min="1" step="1" value="250" inputmode="decimal" />
+        <span class="hint">Default 250. Change to 194 or another carrier factor for comparison only.</span>
+      </div>
+      <label class="mt-3 flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-ink">
+        <input type="checkbox" id="show-dim" class="h-5 w-5 accent-ink" checked />
+        Show DIM weight in results
+      </label>
+    </fieldset>
+
+    <div class="mt-5 flex flex-wrap gap-2">
+      <button type="submit" class="btn-primary">Calculate</button>
+      <button type="button" id="reset-form" class="btn-ghost">Reset</button>
+    </div>
+  </form>
+
+  <div id="fc-unit-warn" class="alert alert-danger mt-5" hidden role="status"></div>
+  <div id="fc-error" class="alert alert-danger mt-5" hidden role="alert"></div>
+
+  <div id="fc-results" class="mt-6" hidden>
+    <div class="result-hero mb-4">
+      <p class="text-sm text-mute">Estimated freight class</p>
+      <p class="amount tabular-nums" id="out-class">—</p>
+      <p class="mt-1 text-sm font-medium text-ink" id="out-blend-note">
+        Blended density class — not per-pallet.
+      </p>
+      <p class="mt-1 text-sm text-mute" id="out-class-range"></p>
+    </div>
+    <div class="rounded-[6px] border border-hairline">
+      <div class="result-row px-3">
+        <span class="k">Total volume</span>
+        <span class="v" id="out-volume">—</span>
+      </div>
+      <div class="result-row px-3">
+        <span class="k">Total weight</span>
+        <span class="v" id="out-weight">—</span>
+      </div>
+      <div class="result-row px-3">
+        <span class="k">Density</span>
+        <span class="v" id="out-density">—</span>
+      </div>
+      <div class="result-row px-3" id="row-dim" hidden>
+        <span class="k">DIM weight (educational)</span>
+        <span class="v" id="out-dim">—</span>
+      </div>
+      <div class="result-row px-3">
+        <span class="k">Pallets used</span>
+        <span class="v" id="out-count">—</span>
+      </div>
+    </div>
+    <div class="callout callout-warn mt-4" role="note">
+      <strong class="text-warning-deep">Not binding classification.</strong>
+      Density alone does not set the final NMFC class. Packaging, stowability, handling, and liability matter.
+      Density-scale estimate (Jul 2025 13-class) — not ClassIT+ or a carrier rate quote.
+    </div>
+    <p class="mt-4 text-sm text-body">
+      Need a real tender? Soft CTA —
+      <a href="mailto:hello@freightclassestimator.com?subject=Freight%20class%20quote%20request">Get a quote</a>
+      (mailto; we do not run carrier rate APIs).
+    </p>
+  </div>
+</section>
+
+<script>
+  import {
+    estimateShipment,
+    CLASS_DENSITY_RANGES,
+    DEFAULT_DIM_FACTOR,
+  } from "../lib/freightClass";
+
+  const list = document.getElementById("pallet-list");
+  const addBtn = document.getElementById("add-pallet");
+  const removeBtn = document.getElementById("remove-pallet");
+  const form = document.getElementById("fc-form");
+  const errEl = document.getElementById("fc-error");
+  const unitWarnEl = document.getElementById("fc-unit-warn");
+  const results = document.getElementById("fc-results");
+
+  let palletCount = 0;
+
+  function fmt(n, digits = 2) {
+    return Number(n).toLocaleString("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: digits,
+    });
+  }
+
+  function syncRemove() {
+    removeBtn.disabled = palletCount <= 1;
+  }
+
+  function addPallet(defaults = { L: 48, W: 40, H: 48, Wt: "" }) {
+    palletCount += 1;
+    const i = palletCount;
+    const wrap = document.createElement("div");
+    wrap.className = "rounded-[6px] border border-hairline bg-hairline-soft/40 p-3 sm:p-4";
+    wrap.dataset.pallet = String(i);
+    wrap.innerHTML = `
+      <div class="mb-3 flex flex-wrap items-center gap-2">
+        <p class="text-sm font-medium text-ink">Pallet ${i}</p>
+        <span class="inline-flex items-center rounded-full border border-hairline bg-white px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-mute" title="All dimensions must be in inches">Inches only</span>
+      </div>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="field">
+          <label for="L-${i}">Length (in)</label>
+          <input type="number" id="L-${i}" name="L-${i}" min="0.01" step="any" inputmode="decimal" required value="${defaults.L}" />
+        </div>
+        <div class="field">
+          <label for="W-${i}">Width (in)</label>
+          <input type="number" id="W-${i}" name="W-${i}" min="0.01" step="any" inputmode="decimal" required value="${defaults.W}" />
+        </div>
+        <div class="field">
+          <label for="H-${i}">Height (in)</label>
+          <input type="number" id="H-${i}" name="H-${i}" min="0.01" step="any" inputmode="decimal" required value="${defaults.H}" />
+        </div>
+        <div class="field">
+          <label for="Wt-${i}">Weight (lb)</label>
+          <input type="number" id="Wt-${i}" name="Wt-${i}" min="0" step="any" inputmode="decimal" required value="${defaults.Wt}" placeholder="e.g. 350" />
+        </div>
+      </div>
+    `;
+    list.appendChild(wrap);
+    syncRemove();
+  }
+
+  function removeLast() {
+    if (palletCount <= 1) return;
+    const last = list.lastElementChild;
+    if (last) last.remove();
+    palletCount -= 1;
+    [...list.children].forEach((el, idx) => {
+      const n = idx + 1;
+      el.dataset.pallet = String(n);
+      const title = el.querySelector("p");
+      if (title) title.textContent = `Pallet ${n}`;
+    });
+    syncRemove();
+  }
+
+  function showError(msg) {
+    errEl.hidden = !msg;
+    errEl.textContent = msg || "";
+    if (msg) results.hidden = true;
+  }
+
+  function showUnitWarn(msg) {
+    unitWarnEl.hidden = !msg;
+    unitWarnEl.textContent = msg || "";
+  }
+
+  function readPallets() {
+    const pallets = [];
+    for (const el of list.children) {
+      const inputs = el.querySelectorAll("input");
+      const L = parseFloat(inputs[0].value);
+      const W = parseFloat(inputs[1].value);
+      const H = parseFloat(inputs[2].value);
+      const Wt = parseFloat(inputs[3].value);
+      pallets.push({ lengthIn: L, widthIn: W, heightIn: H, weightLb: Wt });
+    }
+    return pallets;
+  }
+
+  function maybeFeetWarn(pallets) {
+    for (const p of pallets) {
+      if (
+        (p.lengthIn > 0 && p.lengthIn <= 10) ||
+        (p.widthIn > 0 && p.widthIn <= 10) ||
+        (p.heightIn > 0 && p.heightIn <= 10)
+      ) {
+        return "One or more dimensions are ≤ 10. Confirm you entered inches (not feet). Typical pallet footprint is ~48×40 in.";
+      }
+    }
+    return "";
+  }
+
+  function calculate(e) {
+    if (e) e.preventDefault();
+    showError("");
+    const pallets = readPallets();
+    showUnitWarn(maybeFeetWarn(pallets));
+
+    const factor = parseFloat(document.getElementById("dim-factor").value) || DEFAULT_DIM_FACTOR;
+    const ship = estimateShipment(pallets, factor);
+
+    if (ship.error || ship.freightClass === null || ship.densityLbPerFt3 === null) {
+      showError(ship.error || "Cannot compute freight class from these inputs.");
+      return;
+    }
+
+    const cls = ship.freightClass;
+    const showDim = document.getElementById("show-dim").checked;
+
+    document.getElementById("out-class").textContent = String(cls);
+    document.getElementById("out-class-range").textContent =
+      `Density range for class ${cls}: ${CLASS_DENSITY_RANGES[cls]}`;
+    document.getElementById("out-volume").textContent = `${fmt(ship.totalVolumeFt3, 3)} ft³`;
+    document.getElementById("out-weight").textContent = `${fmt(ship.totalWeightLb, 2)} lb`;
+    document.getElementById("out-density").textContent = `${fmt(ship.densityLbPerFt3, 4)} lb/ft³`;
+    document.getElementById("out-count").textContent = String(pallets.length);
+    const rowDim = document.getElementById("row-dim");
+    if (showDim && ship.dimWeightLb !== null) {
+      rowDim.hidden = false;
+      document.getElementById("out-dim").textContent = `${fmt(ship.dimWeightLb, 1)} lb (factor ${fmt(factor, 0)})`;
+    } else {
+      rowDim.hidden = true;
+    }
+    results.hidden = false;
+    results.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  addBtn.addEventListener("click", () => addPallet({ L: 48, W: 40, H: 48, Wt: "" }));
+  removeBtn.addEventListener("click", removeLast);
+  form.addEventListener("submit", calculate);
+  document.getElementById("reset-form").addEventListener("click", () => {
+    list.innerHTML = "";
+    palletCount = 0;
+    addPallet({ L: 48, W: 40, H: 48, Wt: "350" });
+    document.getElementById("dim-factor").value = String(DEFAULT_DIM_FACTOR);
+    document.getElementById("show-dim").checked = true;
+    showError("");
+    showUnitWarn("");
+    results.hidden = true;
+  });
+
+  // Seed with golden example defaults
+  addPallet({ L: 48, W: 40, H: 48, Wt: "350" });
+</script>

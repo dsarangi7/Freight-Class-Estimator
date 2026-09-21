@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://freightclassestimator.com/sitemap-index.xml

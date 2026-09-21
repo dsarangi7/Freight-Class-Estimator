@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+---
+
+<BaseLayout
+  title="Contact | Freight Class Estimator"
+  description="Contact Freight Class Estimator at hello@freightclassestimator.com."
+  canonicalPath="/contact/"
+>
+  <SiteHeader slot="header" current="contact" />
+  <div class="site-wrap prose-seo py-10">
+    <h1 class="text-3xl tracking-tight">Contact</h1>
+    <p class="mt-4">
+      For site feedback, corrections, or quote follow-up: email
+      <a href="mailto:hello@freightclassestimator.com">hello@freightclassestimator.com</a>
+      (forwarding will be configured via Cloudflare Email Routing → Gmail once DNS is live).
+    </p>
+    <p>
+      We cannot provide binding freight classification or carrier rates for your shipment. For tender questions,
+      contact your LTL carrier or broker.
+    </p>
+  </div>
+  <SiteFooter slot="footer" />
+</BaseLayout>

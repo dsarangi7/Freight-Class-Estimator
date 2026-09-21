@@ -1,0 +1,91 @@
+---
+export const freightFaqItems = [
+  {
+    q: "What is a freight class calculator?",
+    a: "A freight class calculator estimates an NMFC-style LTL class from shipment density (pounds per cubic foot). Higher density usually means a lower class number — but carriers also weigh stowability, handling, and liability. This tool is a density-scale estimate (Jul 2025 13-class), not ClassIT+ or a rate quote.",
+  },
+  {
+    q: "Is this a free freight class calculator?",
+    a: "Yes. Freight Class Estimator is a free educational calculator that converts shipment dimensions and weight into volume, density, and an NMFC-style density class. It does not provide a carrier quote or binding classification.",
+  },
+  {
+    q: "How to use a freight class calculator for pallets?",
+    a: "Measure the packed length, width, and height of each pallet in inches, then enter each pallet’s weight in pounds. The calculator converts cubic inches to cubic feet, divides total weight by total volume, and maps the resulting density to a class. Check the units before submitting.",
+  },
+  {
+    q: "Is this an LTL freight class calculator?",
+    a: "Yes, it is designed for educational LTL planning. It estimates a density-based freight class and shows volume, weight, blended density, and optional DIM weight. LTL carriers can apply additional commodity, handling, stowability, and liability rules.",
+  },
+  {
+    q: "Is this an NMFC freight class calculator?",
+    a: "It is an NMFC-style density calculator, not an official NMFC classification service. Density is only one factor, and the specific NMFC item, packaging, handling, stowability, and liability can change the class. Confirm binding classifications with your carrier, broker, or NMFTA ClassIT+.",
+  },
+  {
+    q: "How do you calculate freight density?",
+    a: "Volume (ft³) = length × width × height in inches ÷ 1728. Density = weight (lb) ÷ volume (ft³). Example: 48×40×48 in at 350 lb → about 53.33 ft³ → density ≈ 6.56 lb/ft³ → class 125 on this table. Enter dimensions in inches only.",
+  },
+  {
+    q: "What freight class is 6.56 lb/ft³?",
+    a: "On the July 2025 density scale used here, 6.56 lb/ft³ falls in the 6 to less than 8 range, which maps to freight class 125. Boundaries use an inclusive lower limit and exclusive upper limit, so exactly 6 is class 175 and exactly 8 is class 100.",
+  },
+  {
+    q: "What are the freight class density ranges?",
+    a: "The table runs from class 50 at 50 lb/ft³ or more, through 55, 60, 65, 70, 85, 92.5, 100, 125, 175, 250, and 300, down to class 400 below 1 lb/ft³. Review the complete density-to-class table above before booking freight.",
+  },
+  {
+    q: "Is density the only factor for NMFC freight class?",
+    a: "No. Density is often the starting point for many commodities, but the official class can change based on packaging, how well freight stows, handling characteristics, and liability. Always confirm with your carrier, broker, or NMFTA ClassIT+ when classification is binding.",
+  },
+  {
+    q: "Does this support multiple pallets?",
+    a: "Yes. Add each pallet’s L/W/H (inches) and weight. This MVP sums all volumes and weights, then computes one blended density and one class — not a per-pallet classification. If pallets differ wildly (e.g. steel vs pillows), document and classify lines separately.",
+  },
+  {
+    q: "Can I use a freight class calculator for multiple pallets?",
+    a: "Enter every pallet as a separate row. This calculator adds all pallet volumes and all pallet weights, then calculates one blended density and one estimated class for the shipment. For different commodities or very different densities, ask your carrier whether each line should be classified separately.",
+  },
+  {
+    q: "Should I classify each pallet separately?",
+    a: "Use the blended multi-pallet result when the shipment is being considered as one density calculation. If the pallets contain different commodities or have materially different densities, keep the lines separate and confirm the classification with your carrier or broker.",
+  },
+  {
+    q: "What is DIM weight vs freight class?",
+    a: "Dimensional (DIM) weight is volume × a carrier factor (often 250 or 194 depending on mode). It is used in some pricing formulas and is not the same as NMFC freight class — DIM is not used for the density-scale class estimate here. Carrier factors vary; showing DIM is educational only, not a quote.",
+  },
+  {
+    q: "Is this the same as NMFTA ClassIT+?",
+    a: "No. Freight Class Estimator is an independent educational density-to-class estimator. It is not affiliated with NMFTA and does not replace ClassIT+ or carrier classification tools.",
+  },
+  {
+    q: "Does this freight class calculator work for FedEx Freight or other carriers?",
+    a: "It can help you prepare an educational density estimate for an LTL shipment, including shipments later tendered to FedEx Freight or another carrier. It does not connect to carrier rating systems, use carrier-specific tariffs, or guarantee the class a carrier will accept.",
+  },
+  {
+    q: "Is this a freight class calculator for XPO, Old Dominion, Saia, R+L, or ODFL?",
+    a: "It is not an official XPO, Old Dominion, Saia, R+L, ODFL, or other carrier calculator. You can use the density estimate to prepare shipment details, but each carrier may apply its own rules, pricing, and classification review. Confirm the final class with the carrier or broker.",
+  },
+  {
+    q: "How do I determine freight class?",
+    a: "Start with packed dimensions and weight, calculate volume and density, then compare density with the published class ranges. This calculator does those steps for you, but the final class can depend on the commodity and the carrier’s current classification rules.",
+  },
+  {
+    q: "What changed in the July 2025 freight class scale?",
+    a: "This calculator uses the 13-class density scale effective July 19, 2025, with the published density breakpoints shown in the table. A carrier may apply a different rule for a specific NMFC item, so the table is an educational estimate rather than a binding tariff decision.",
+  },
+  {
+    q: "Can I get a shipping rate here?",
+    a: "No. This site does not call carrier rating APIs. Use the soft “Get a quote” mailto if you want human follow-up, or ask your LTL carrier/broker for a real tender.",
+  },
+];
+---
+
+<section id="faq" class="faq mt-12" aria-labelledby="faq-heading">
+  <h2 id="faq-heading" class="mb-2 text-xl">FAQ — freight class calculator</h2>
+  <p class="mb-4 text-sm text-mute">Density, NMFC caveats, multi-pallet, and DIM weight.</p>
+  {freightFaqItems.map((item) => (
+    <details>
+      <summary>{item.q}</summary>
+      <div class="answer">{item.a}</div>
+    </details>
+  ))}
+</section>

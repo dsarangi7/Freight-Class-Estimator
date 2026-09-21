@@ -1,0 +1,37 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+---
+
+<BaseLayout
+  title="Terms of Use | Freight Class Estimator"
+  description="Terms of use for Freight Class Estimator educational freight class density estimator. Not a shipping quote."
+  canonicalPath="/terms/"
+>
+  <SiteHeader slot="header" />
+  <div class="site-wrap prose-seo py-10">
+    <h1 class="text-3xl tracking-tight">Terms of Use</h1>
+    <p class="text-sm text-mute">Last updated: September 21, 2026</p>
+    <p class="mt-4">
+      Freight Class Estimator provides educational estimates of NMFC-style freight class from shipment density.
+      Results are approximate, omit many classification factors, and can become outdated when industry tables change.
+    </p>
+    <h2>Not classification advice or a quote</h2>
+    <p>
+      Nothing on this site is legal, freight-classification, or brokerage advice. Confirm with your carrier, broker,
+      or NMFTA ClassIT+ before tendering. We are not affiliated with NMFTA or any carrier.
+    </p>
+    <h2>Density-only estimate</h2>
+    <p>
+      Estimates use density alone. Stowability, handling, liability, and specific NMFC items can change class.
+      Optional DIM weight is educational only; carrier factors vary.
+    </p>
+    <h2>Limitation</h2>
+    <p>
+      To the maximum extent permitted by law, Freight Class Estimator and its operators are not liable for decisions made using
+      these estimates. Use at your own risk.
+    </p>
+  </div>
+  <SiteFooter slot="footer" />
+</BaseLayout>

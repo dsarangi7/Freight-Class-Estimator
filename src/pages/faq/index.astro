@@ -1,0 +1,46 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import FaqFreight, { freightFaqItems } from "../../components/FaqFreight.astro";
+
+const site = Astro.site?.toString().replace(/\/$/, "") || "https://freightclassestimator.com";
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: freightFaqItems.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
+---
+
+<BaseLayout
+  title="Freight Class Calculator FAQ | LTL, NMFC & Multiple Pallets"
+  description="Freight class calculator FAQs: how to calculate LTL density, determine NMFC-style class, use multiple pallets, compare DIM weight, and verify carrier rules."
+  canonicalPath="/faq/"
+  jsonLd={faqLd}
+>
+  <SiteHeader slot="header" current="faq" />
+
+  <div class="site-wrap py-8 sm:py-10">
+    <section class="hero mb-8" aria-labelledby="faq-page-heading">
+      <p class="mb-2 font-mono text-xs font-medium uppercase tracking-wide text-mute">LTL · Density · Classification</p>
+      <h1 id="faq-page-heading" class="text-3xl tracking-tight sm:text-[40px] sm:leading-tight">
+        Freight Class Calculator FAQ
+      </h1>
+      <p class="lede mt-3 max-w-2xl text-[17px] leading-7 text-body">
+        Clear answers about freight density, NMFC-style classes, pallets, DIM weight, and what to verify before an LTL shipment is booked.
+      </p>
+    </section>
+
+    <FaqFreight />
+
+    <p class="mt-8 text-sm text-mute">
+      Ready to calculate? Use the <a href="/">freight class calculator</a> to combine dimensions and weight into a density-scale estimate.
+    </p>
+  </div>
+
+  <SiteFooter slot="footer" />
+</BaseLayout>
