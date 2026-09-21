@@ -2,28 +2,106 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import SiteHeader from "../../components/SiteHeader.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
+import { CLASS_DENSITY_RANGES } from "../../lib/freightClass";
+
+const classOrder = [50, 55, 60, 65, 70, 85, 92.5, 100, 125, 175, 250, 300, 400] as const;
+const classRows = classOrder.map((freightClass) => ({
+  freightClass: String(freightClass),
+  density: CLASS_DENSITY_RANGES[freightClass],
+}));
 ---
 
 <BaseLayout
-  title="About Freight Class Estimator | Density Freight Class Tool"
-  description="About Freight Class Estimator — free educational NMFC-style freight class and density calculator. Not ClassIT+. Not a shipping quote."
+  title="Freight Class Information | Density, NMFC-Style Classes & LTL"
+  description="Learn how freight class is estimated from pallet dimensions, volume, weight, and density. Includes formulas, a worked example, class ranges, and LTL classification caveats."
   canonicalPath="/about/"
 >
   <SiteHeader slot="header" current="about" />
-  <div class="site-wrap prose-seo py-10">
-    <h1 class="text-3xl tracking-tight">About Freight Class Estimator</h1>
-    <p class="mt-4">
-      <strong>Freight Class Estimator</strong> (freightclassestimator.com) publishes a free, private, educational
-      density-based freight class estimator for LTL planning.
-    </p>
-    <p>
-      We focus on clear math: inches → cubic feet → lb/ft³ → NMFC-style class, with multi-pallet totals and an optional
-      educational DIM weight view. These tools do not rate carriers, do not replace NMFTA ClassIT+, and are not affiliated
-      with any freight bureau or carrier network.
-    </p>
-    <p>
-      Start with the <a href="/">freight class calculator</a>. Questions: <a href="/contact/">contact</a>.
-    </p>
+  <div class="site-wrap py-8 sm:py-10">
+    <section class="hero mb-10" aria-labelledby="info-heading">
+      <p class="mb-2 font-mono text-xs font-medium uppercase tracking-wide text-mute">LTL · Density · Freight education</p>
+      <h1 id="info-heading" class="text-3xl tracking-tight sm:text-[40px] sm:leading-tight">Freight Class Information</h1>
+      <p class="mt-3 max-w-2xl text-[17px] leading-7 text-body">
+        Understand how a freight class calculator turns packed pallet dimensions and weight into a density-based estimate.
+        Use the <a href="/">freight class calculator</a> for the calculation, then verify the final class with your carrier or broker.
+      </p>
+    </section>
+
+    <article class="prose-seo" aria-labelledby="density-heading">
+      <h2 id="density-heading">How freight density is calculated</h2>
+      <p>
+        Freight density is the shipment weight divided by its total volume. Measure the freight as it will ship, including
+        the pallet, packaging, and protective materials. Use inches for every dimension and pounds for weight.
+      </p>
+      <div class="callout" role="note">
+        <strong class="text-ink">Volume (ft³)</strong> = length × width × height ÷ 1,728.<br />
+        <strong class="text-ink">Density (lb/ft³)</strong> = weight (lb) ÷ volume (ft³).
+      </div>
+
+      <h2>Worked freight class example</h2>
+      <p>
+        A pallet measuring <strong>48 × 40 × 48 inches</strong> and weighing <strong>350 lb</strong> has a volume of
+        about <strong>53.333 ft³</strong>. Divide 350 lb by 53.333 ft³ to get approximately
+        <strong>6.5625 lb/ft³</strong>. That density falls in the 6 to less than 8 range, producing an estimated
+        <strong>freight class 125</strong> on the July 2025 scale.
+      </p>
+
+      <h2>Freight class density ranges</h2>
+      <p>
+        These are the inclusive-lower and exclusive-upper ranges used by this educational estimator. A higher density generally
+        maps to a lower class number, but density is not the only classification factor.
+      </p>
+    </article>
+
+    <div class="card mt-6" aria-labelledby="ranges-heading">
+      <h2 id="ranges-heading" class="mb-3 text-lg">Density to freight class table</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[280px] text-left text-sm">
+          <thead>
+            <tr class="border-b border-hairline text-mute">
+              <th class="py-2 pr-4 font-medium">Freight class</th>
+              <th class="py-2 font-medium">Density (lb/ft³)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {classRows.map((row) => (
+              <tr class="border-b border-hairline last:border-0">
+                <td class="py-2 pr-4 font-medium tabular-nums text-ink">{row.freightClass}</td>
+                <td class="py-2 text-body">{row.density}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <article class="prose-seo" aria-labelledby="shipping-heading">
+      <h2 id="shipping-heading">How to measure freight for an LTL shipment</h2>
+      <ol>
+        <li>Measure the longest packed length, width, and height in inches.</li>
+        <li>Weigh the complete shipping unit, including pallet and packaging.</li>
+        <li>Enter each pallet into the calculator and review the density and estimated class.</li>
+        <li>Keep the dimensions, weight, commodity description, and packaging notes for the carrier or broker.</li>
+      </ol>
+      <p>
+        For multiple pallets, this calculator adds all volumes and all weights before calculating one blended density. If the
+        pallets contain different commodities or have very different densities, ask whether they should be submitted as separate
+        freight lines instead.
+      </p>
+
+      <h2>What can change the final freight class?</h2>
+      <p>
+        Density is a useful starting point, but official classification can also depend on the specific NMFC item, packaging,
+        stowability, handling characteristics, and liability. A carrier may review the shipment differently from this educational
+        estimate. This site is not NMFTA ClassIT+, a binding classification service, or a shipping quote.
+      </p>
+      <h2>About Freight Class Estimator</h2>
+      <p>
+        Freight Class Estimator is a free, private educational tool for LTL planning. It performs calculations in your browser,
+        does not rate carriers, and is not affiliated with NMFTA or any carrier network. Read the <a href="/faq/">freight class FAQ</a>
+        or <a href="/contact/">contact us</a> with questions.
+      </p>
+    </article>
   </div>
   <SiteFooter slot="footer" />
 </BaseLayout>
