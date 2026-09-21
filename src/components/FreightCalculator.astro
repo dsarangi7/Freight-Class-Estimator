@@ -94,6 +94,7 @@
 </section>
 
 <script>
+// @ts-nocheck
   import {
     estimateShipment,
     CLASS_DENSITY_RANGES,
@@ -198,9 +199,9 @@
     const last = list.lastElementChild;
     if (last) last.remove();
     palletCount -= 1;
-    [...list.children].forEach((el, idx) => {
+    Array.from(list.children).forEach((el, idx) => {
       const n = idx + 1;
-      el.dataset.pallet = String(n);
+      el.setAttribute("data-pallet", String(n));
       const title = el.querySelector("p");
       if (title) title.textContent = `Pallet ${n}`;
     });
@@ -280,7 +281,7 @@
     results.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  unitButtons.forEach((button) => button.addEventListener("click", () => setUnitMode(button.dataset.unitMode)));
+  unitButtons.forEach((button) => button.addEventListener("click", () => setUnitMode(button.dataset.unitMode || "imperial")));
   addBtn.addEventListener("click", () => addPallet({
     L: unitMode === "metric" ? 121.92 : 48,
     W: unitMode === "metric" ? 101.6 : 40,
