@@ -4,9 +4,16 @@
 <section class="card" aria-labelledby="calc-heading">
   <h2 id="calc-heading" class="mb-2 text-xl">Estimate freight class from density</h2>
   <p class="mb-4 text-sm text-mute">
-    Enter pallet dimensions (<strong class="text-ink">inches only</strong>) and weight (lb). Multi-pallet: volumes and
-    weights are <strong class="text-ink">summed</strong>, then one blended density → one class (not per-pallet).
+    Enter pallet dimensions and weight. Multi-pallet: volumes and weights are <strong class="text-ink">summed</strong>,
+    then one blended density → one class (not per-pallet).
   </p>
+
+  <fieldset class="unit-toggle" aria-label="Input units">
+    <legend class="sr-only">Input units</legend>
+    <button type="button" class="active" data-unit-mode="imperial" aria-pressed="true">Imperial: inches / lb</button>
+    <button type="button" data-unit-mode="metric" aria-pressed="false">Metric: centimeters / kg</button>
+  </fieldset>
+  <p class="mt-2 text-xs text-mute" data-unit-note>Enter dimensions in inches and weight in pounds.</p>
 
   <form id="fc-form" novalidate>
     <div id="pallet-list" class="space-y-4" aria-live="polite"></div>
@@ -100,6 +107,12 @@
   const errEl = document.getElementById("fc-error");
   const unitWarnEl = document.getElementById("fc-unit-warn");
   const results = document.getElementById("fc-results");
+  const unitNote = document.querySelector("[data-unit-note]");
+  const unitButtons = [...document.querySelectorAll("[data-unit-mode]")];
+
+  const CM_PER_IN = 2.54;
+  const KG_PER_LB = 0.45359237;
+  let unitMode = "imperial";
 
   let palletCount = 0;
 
@@ -123,29 +136,61 @@
     wrap.innerHTML = `
       <div class="mb-3 flex flex-wrap items-center gap-2">
         <p class="text-sm font-medium text-ink">Pallet ${i}</p>
-        <span class="inline-flex items-center rounded-full border border-hairline bg-white px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-mute" title="All dimensions must be in inches">Inches only</span>
+        <span class="inline-flex items-center rounded-full border border-hairline bg-white px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-mute" data-unit-badge title="Input units">Inches / lb</span>
       </div>
       <div class="grid gap-3 sm:grid-cols-2">
         <div class="field">
-          <label for="L-${i}">Length (in)</label>
+          <label for="L-${i}" data-field-label="length">Length (in)</label>
           <input type="number" id="L-${i}" name="L-${i}" min="0.01" step="any" inputmode="decimal" required value="${defaults.L}" />
         </div>
         <div class="field">
-          <label for="W-${i}">Width (in)</label>
+          <label for="W-${i}" data-field-label="width">Width (in)</label>
           <input type="number" id="W-${i}" name="W-${i}" min="0.01" step="any" inputmode="decimal" required value="${defaults.W}" />
         </div>
         <div class="field">
-          <label for="H-${i}">Height (in)</label>
+          <label for="H-${i}" data-field-label="height">Height (in)</label>
           <input type="number" id="H-${i}" name="H-${i}" min="0.01" step="any" inputmode="decimal" required value="${defaults.H}" />
         </div>
         <div class="field">
-          <label for="Wt-${i}">Weight (lb)</label>
+          <label for="Wt-${i}" data-field-label="weight">Weight (lb)</label>
           <input type="number" id="Wt-${i}" name="Wt-${i}" min="0" step="any" inputmode="decimal" required value="${defaults.Wt}" placeholder="e.g. 350" />
         </div>
       </div>
     `;
     list.appendChild(wrap);
     syncRemove();
+    updateUnitLabels();
+  }
+
+  function updateUnitLabels() {
+    const metric = unitMode === "metric";
+    document.querySelectorAll("[data-field-label='length']").forEach((label) => { label.textContent = `Length (${metric ? "cm" : "in"})`; });
+    document.querySelectorAll("[data-field-label='width']").forEach((label) => { label.textContent = `Width (${metric ? "cm" : "in"})`; });
+    document.querySelectorAll("[data-field-label='height']").forEach((label) => { label.textContent = `Height (${metric ? "cm" : "in"})`; });
+    document.querySelectorAll("[data-field-label='weight']").forEach((label) => { label.textContent = `Weight (${metric ? "kg" : "lb"})`; });
+    document.querySelectorAll("[data-unit-badge]").forEach((badge) => { badge.textContent = metric ? "Centimeters / kg" : "Inches / lb"; });
+    unitNote.textContent = metric
+      ? "Enter dimensions in centimeters and weight in kilograms. Results use the standard lb/ft³ scale."
+      : "Enter dimensions in inches and weight in pounds.";
+    unitButtons.forEach((button) => {
+      const active = button.dataset.unitMode === unitMode;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+  }
+
+  function setUnitMode(nextMode) {
+    if (nextMode === unitMode) return;
+    const toMetric = nextMode === "metric";
+    document.querySelectorAll("[data-pallet]").forEach((pallet) => {
+      pallet.querySelectorAll("input").forEach((input, index) => {
+        const factor = index === 3 ? (toMetric ? KG_PER_LB : 1 / KG_PER_LB) : (toMetric ? CM_PER_IN : 1 / CM_PER_IN);
+        const value = Number(input.value);
+        if (Number.isFinite(value)) input.value = String(Number((value * factor).toFixed(2)));
+      });
+    });
+    unitMode = nextMode;
+    updateUnitLabels();
   }
 
   function removeLast() {
@@ -177,10 +222,11 @@
     const pallets = [];
     for (const el of list.children) {
       const inputs = el.querySelectorAll("input");
-      const L = parseFloat(inputs[0].value);
-      const W = parseFloat(inputs[1].value);
-      const H = parseFloat(inputs[2].value);
-      const Wt = parseFloat(inputs[3].value);
+      const metric = unitMode === "metric";
+      const L = parseFloat(inputs[0].value) / (metric ? CM_PER_IN : 1);
+      const W = parseFloat(inputs[1].value) / (metric ? CM_PER_IN : 1);
+      const H = parseFloat(inputs[2].value) / (metric ? CM_PER_IN : 1);
+      const Wt = parseFloat(inputs[3].value) / (metric ? KG_PER_LB : 1);
       pallets.push({ lengthIn: L, widthIn: W, heightIn: H, weightLb: Wt });
     }
     return pallets;
@@ -234,7 +280,13 @@
     results.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  addBtn.addEventListener("click", () => addPallet({ L: 48, W: 40, H: 48, Wt: "" }));
+  unitButtons.forEach((button) => button.addEventListener("click", () => setUnitMode(button.dataset.unitMode)));
+  addBtn.addEventListener("click", () => addPallet({
+    L: unitMode === "metric" ? 121.92 : 48,
+    W: unitMode === "metric" ? 101.6 : 40,
+    H: unitMode === "metric" ? 121.92 : 48,
+    Wt: "",
+  }));
   removeBtn.addEventListener("click", removeLast);
   form.addEventListener("submit", calculate);
   document.getElementById("reset-form").addEventListener("click", () => {
@@ -243,6 +295,8 @@
     addPallet({ L: 48, W: 40, H: 48, Wt: "350" });
     document.getElementById("dim-factor").value = String(DEFAULT_DIM_FACTOR);
     document.getElementById("show-dim").checked = true;
+    unitMode = "imperial";
+    updateUnitLabels();
     showError("");
     showUnitWarn("");
     results.hidden = true;

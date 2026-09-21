@@ -133,6 +133,16 @@
   .mode-toggle button.active {
     @apply border-ink bg-ink text-on-primary;
   }
+  .unit-toggle {
+    @apply grid grid-cols-1 gap-2 rounded-[6px] bg-hairline-soft p-1.5 sm:grid-cols-2;
+  }
+  .unit-toggle button {
+    @apply min-h-11 rounded-[6px] px-3 py-2 text-sm font-medium text-body transition
+      hover:bg-canvas-elevated hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink;
+  }
+  .unit-toggle button.active {
+    @apply bg-ink text-on-primary shadow-[0_1px_2px_rgba(0,0,0,0.14)];
+  }
   .mode-panel {
     @apply mt-4 hidden;
   }
@@ -258,7 +268,8 @@ html.dark .bg-red-50 {
 }
 
 html.dark .btn-primary,
-html.dark .mode-toggle button.active {
+html.dark .mode-toggle button.active,
+html.dark .unit-toggle button.active {
   background-color: #f5f5f5;
   color: #171717;
 }
