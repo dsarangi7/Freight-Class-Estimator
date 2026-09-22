@@ -11,7 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "test:golden": "node --experimental-strip-types tests/golden.mjs",
-    "pages:deploy": "npm run build && wrangler pages deploy dist --project-name=freightclassestimator",
+    "pages:deploy": "npm run build && wrangler pages deploy dist --project-name=freight-class-estimator",
     "favicons": "node scripts/generate-favicons.mjs"
   },
   "dependencies": {

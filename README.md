@@ -104,7 +104,7 @@ PUBLIC_GA4_ID=          # set only when ready, e.g. G-XXXXXXXXXX
 
 ```bash
 npm run pages:deploy
-# = npm run build && wrangler pages deploy dist --project-name=freightclassestimator
+# = npm run build && wrangler pages deploy dist --project-name=freight-class-estimator
 ```
 
 `public/_headers` sets security headers and `X-Robots-Tag: noindex` for `*.pages.dev`.

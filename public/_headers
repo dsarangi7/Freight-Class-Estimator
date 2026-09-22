@@ -1,6 +1,9 @@
 # Cloudflare Pages headers
-# Preview / pages.dev: never index
+# Cloudflare Workers/Pages production and preview hosts: never index
 https://freight-class-estimator.dsarangi7.workers.dev/*
+  X-Robots-Tag: noindex, nofollow
+
+https://*-freight-class-estimator.dsarangi7.workers.dev/*
   X-Robots-Tag: noindex, nofollow
 
 /*
